@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Captura de Foto SUNEDU</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- PANEL 1: Registro -->
+        <div id="panel-registro" class="panel active">
+            <h2>Registro de Usuario</h2>
+            <form id="registro-form">
+                <div class="input-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" required>
+                </div>
+                <div class="input-group">
+                    <label for="apellido">Apellido:</label>
+                    <input type="text" id="apellido" required>
+                </div>
+                <div class="input-group">
+                    <label for="correo">Correo Electrónico:</label>
+                    <input type="email" id="correo" required>
+                </div>
+                <div class="input-group">
+                    <label for="dni">Número de DNI:</label>
+                    <input type="text" id="dni" pattern="\d{8}" maxlength="8" required>
+                </div>
+                <button type="button" id="btn-ingresar" disabled>Ingresar y Tomar Foto</button>
+            </form>
+        </div>
+
+        <!-- PANEL 2: Cámara -->
+        <div id="panel-camara" class="panel">
+            <h2>Toma tu Foto (Formato SUNEDU)</h2>
+            <p class="instrucciones">Alinea tu rostro dentro del marco. Usa un fondo blanco bien iluminado.</p>
+            
+            <div class="camera-wrapper">
+                <video id="video" autoplay playsinline></video>
+                <!-- Guía visual para alinear ojos y boca -->
+                <div class="guide-overlay">
+                    <div class="guide-eyes">Zona de Ojos</div>
+                    <div class="guide-mouth">Boca</div>
+                </div>
+            </div>
+
+            <!-- Canvas oculto para procesar la imagen a 240x288 -->
+            <canvas id="canvas" width="240" height="288" style="display: none;"></canvas>
+            
+            <div id="estado-camara" class="status-indicator">Verificando...</div>
+            
+            <button type="button" id="btn-capturar">Tomar Foto</button>
+            <button type="button" id="btn-volver-registro" class="btn-secundario">Volver</button>
+        </div>
+
+        <!-- PANEL 3: Confirmación -->
+        <div id="panel-confirmacion" class="panel">
+            <h2>Previsualización</h2>
+            <p>Así es como se enviará tu foto. ¿Confirmas?</p>
+            
+            <div class="preview-container">
+                <img id="foto-preview" src="" alt="Previsualización de la foto">
+            </div>
+
+            <div class="button-group">
+                <button type="button" id="btn-cancelar" class="btn-secundario">Cancelar (Volver a tomar)</button>
+                <button type="button" id="btn-enviar">Enviar Datos y Foto</button>
+            </div>
+            <div id="mensaje-envio"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
