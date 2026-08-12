@@ -136,3 +136,8 @@ video {
     max-width: 240px;
     margin-bottom: 15px;
 }
+
+/* Efecto espejo para la cámara frontal */
+.espejo {
+    transform: scaleX(-1);
+}
