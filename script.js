@@ -164,10 +164,10 @@ function procesarResultadosFaciales(results) {
     
     // Si la cara mide menos de 110px en el recorte, estás muy lejos.
     // Si mide más de 190px, estás muy cerca (te saldrías del marco SUNEDU).
-    if (anchoRostro < 110) {
+    if (anchoRostro < 90) {
         validaciones.distancia = false;
         actualizarBadge(badgeDist, false, "❌ Acércate más");
-    } else if (anchoRostro > 190) {
+    } else if (anchoRostro > 200) {
         validaciones.distancia = false;
         actualizarBadge(badgeDist, false, "❌ Aléjate un poco");
     } else {
