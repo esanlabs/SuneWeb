@@ -120,11 +120,6 @@ document.getElementById('btn-enviar').addEventListener('click', async () => {
     const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzoChC6KMP-ayz1FZqtQ06EX13w4H4eA0zD7g1Fq5mBevjSN6922tpPwV4rYUIijP3s/exec";
 
     try {
-        // MOCK DE ENVÍO (Simulación temporal para que veas cómo funciona)
-        // En producción, descomenta el fetch de abajo y borra este setTimeout
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        
-        /* 
         // CÓDIGO REAL PARA PRODUCCIÓN:
         const response = await fetch(URL_APPS_SCRIPT, {
             method: 'POST',
@@ -132,7 +127,6 @@ document.getElementById('btn-enviar').addEventListener('click', async () => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
         });
-        */
 
         mensaje.style.color = "green";
         mensaje.innerText = "¡Enviado con éxito a Drive y al correo!";
