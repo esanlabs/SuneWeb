@@ -108,7 +108,6 @@ function procesarResultadosFaciales(results) {
     const landmarks = results.multiFaceLandmarks[0];
 
     // Coordenadas proporcionales transformadas al tamaño estándar SUNEDU (240x288)
-    // Ojo Izquierdo (punto 33), Ojo Derecho (punto 263), Boca (punto 13)
     let ojoIzqX = landmarks[33].x * 240;
     let ojoIzqY = landmarks[33].y * 288;
     let ojoDerX = landmarks[263].x * 240;
@@ -116,33 +115,34 @@ function procesarResultadosFaciales(results) {
     let bocaX = landmarks[13].x * 240;
     let bocaY = landmarks[13].y * 288;
 
-    // Si la cámara es frontal (espejo), invertimos la referencia horizontal para calzar exacto
+    // Efecto espejo matemático si se usa cámara frontal
     if (modoCamara === "user") {
         ojoIzqX = 240 - ojoIzqX;
         ojoDerX = 240 - ojoDerX;
         bocaX = 240 - bocaX;
     }
 
-    // 1. Verificar límites según tu especificación SUNEDU:
-    // Ojo Izq: X(24-120), Y(55-180) | Ojo Der: X(80-185), Y(50-180) | Boca: X(50-161), Y(70-252)
-    const ojoIzqOk = (ojoIzqX >= 20 && ojoIzqX <= 125) && (ojoIzqY >= 50 && ojoIzqY <= 185);
-    const ojoDerOk = (ojoDerX >= 75 && ojoDerX <= 190) && (ojoDerY >= 45 && ojoDerY <= 185);
-    const bocaOk = (bocaX >= 45 && bocaX <= 165) && (bocaY >= 65 && bocaY <= 255);
+    // 1. Verificar Posición (Límites SUNEDU puros)
+    const ojoIzqOk = (ojoIzqX >= 24 && ojoIzqX <= 120) && (ojoIzqY >= 55 && ojoIzqY <= 180);
+    const ojoDerOk = (ojoDerX >= 80 && ojoDerX <= 185) && (ojoDerY >= 50 && ojoDerY <= 180);
+    const bocaOk = (bocaX >= 50 && bocaX <= 161) && (bocaY >= 70 && bocaY <= 252);
 
     if (ojoIzqOk && ojoDerOk && bocaOk) {
         validaciones.posicion = true;
         actualizarBadge(badgePos, true, "✅ Alineación correcta");
     } else {
         validaciones.posicion = false;
-        actualizarBadge(badgePos, false, "❌ Centra ojos y boca");
+        actualizarBadge(badgePos, false, "❌ Centra tu rostro");
     }
 
-    // 2. Verificar Distancia (Ancho del rostro entre sienes)
-    const anchoRostro = Math.abs(landmarks[454].x - landmarks[234].x) * 240;
-    if (anchoRostro < 80) {
+    // 2. Verificar Distancia (Separación entre los ojos)
+    // Esto evita la contradicción. Para un cuadro de 240px, una separación normal de ojos es ~55 a 90px.
+    const distanciaOjos = ojoDerX - ojoIzqX;
+    
+    if (distanciaOjos < 55) {
         validaciones.distancia = false;
         actualizarBadge(badgeDist, false, "❌ Acércate más");
-    } else if (anchoRostro > 170) {
+    } else if (distanciaOjos > 90) {
         validaciones.distancia = false;
         actualizarBadge(badgeDist, false, "❌ Aléjate un poco");
     } else {
