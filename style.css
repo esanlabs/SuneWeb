@@ -70,15 +70,30 @@ button.btn-secundario {
 }
 
 /* Estilos de la cámara y guías */
+/* Ajustamos la cámara para que crezca según la pantalla */
 .camera-wrapper {
     position: relative;
-    width: 240px; /* Ancho SUNEDU */
-    height: 288px; /* Alto SUNEDU */
+    width: 100%;
+    max-width: 280px; /* Tamaño máximo en PC */
+    aspect-ratio: 240 / 288; /* Mantiene la proporción exacta de SUNEDU */
+    height: auto; /* Anula el height fijo que tenías antes */
     margin: 0 auto 15px auto;
     background-color: #000;
     overflow: hidden;
     border: 2px solid #0056b3;
+    border-radius: 8px; /* Bordes redondeados modernos */
 }
+
+/* Rediseño de los indicadores (ahora en cuadrícula abajo) */
+.indicadores-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin: 15px 0 20px 0;
+}
+
+
 
 video {
     width: 100%;
@@ -131,9 +146,14 @@ video {
     margin-bottom: 15px;
 }
 
+/* Ajuste al preview de la foto para que también sea responsive */
 .preview-container img {
-    border: 1px solid #ccc;
-    max-width: 240px;
+    border: 2px solid #0056b3;
+    width: 100%;
+    max-width: 280px;
+    aspect-ratio: 240 / 288;
+    height: auto;
+    border-radius: 8px;
     margin-bottom: 15px;
 }
 
@@ -156,13 +176,13 @@ video {
 }
 
 .badge {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: bold;
-    padding: 3px 6px;
-    border-radius: 4px;
-    text-align: left;
-    backdrop-filter: blur(2px);
-    transition: all 0.2s ease;
+    padding: 8px 12px;
+    border-radius: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .badge-ok {
@@ -173,4 +193,28 @@ video {
 .badge-fail {
     background-color: rgba(220, 53, 69, 0.85);
     color: white;
+}
+
+/* --- REGLAS PARA CELULARES Y TABLETS --- */
+@media (max-width: 500px) {
+    .app-container {
+        padding: 20px;
+        margin: 15px;
+        width: 95%; /* Toma casi toda la pantalla */
+    }
+    
+    .camera-wrapper, .preview-container img {
+        max-width: 100%; /* La cámara ocupará todo el ancho disponible */
+    }
+
+    button {
+        font-size: 18px; /* Letras más grandes */
+        padding: 15px; /* Botones más gordos para tocar fácil con el dedo */
+        margin-top: 12px;
+    }
+
+    .badge {
+        font-size: 13px; /* Indicadores más legibles */
+        padding: 8px 14px;
+    }
 }
