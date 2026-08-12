@@ -117,7 +117,7 @@ document.getElementById('btn-enviar').addEventListener('click', async () => {
       Reemplaza la URL_DE_TU_APPS_SCRIPT por la que Google te dé.
       ===============================================================
     */
-    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzoChC6KMP-ayz1FZqtQ06EX13w4H4eA0zD7g1Fq5mBevjSN6922tpPwV4rYUIijP3s/exec";
+    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbx854B1Q0Fy81R8P0eSQH3AhaiwPoaNFnM0Kz42FO9qEZ-zJMolFpwSXfpJN7oHxEg4/exec";
 
     try {
         // CÓDIGO REAL PARA PRODUCCIÓN:
