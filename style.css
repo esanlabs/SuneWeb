@@ -141,3 +141,36 @@ video {
 .espejo {
     transform: scaleX(-1);
 }
+
+/* Indicadores superpuestos sobre la cámara */
+.indicadores-overlay {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.badge {
+    font-size: 10px;
+    font-weight: bold;
+    padding: 3px 6px;
+    border-radius: 4px;
+    text-align: left;
+    backdrop-filter: blur(2px);
+    transition: all 0.2s ease;
+}
+
+.badge-ok {
+    background-color: rgba(40, 167, 69, 0.85);
+    color: white;
+}
+
+.badge-fail {
+    background-color: rgba(220, 53, 69, 0.85);
+    color: white;
+}
