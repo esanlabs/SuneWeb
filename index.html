@@ -40,26 +40,25 @@
         <!-- PANEL 2: Cámara -->
         <div id="panel-camara" class="panel">
             <h2>Toma tu Foto (Formato SUNEDU)</h2>
-            <p class="instrucciones">Alinea tu rostro según los indicadores en pantalla.</p>
+            <p class="instrucciones">Alinea tu rostro según los indicadores.</p>
             
             <div class="camera-wrapper">
                 <video id="video" autoplay playsinline></video>
-                <!-- Solo dejamos un marco muy sutil, sin los textos invasivos -->
                 <div class="guide-overlay"></div>
-                
-                <!-- Panel flotante de validaciones en tiempo real -->
-                <div id="indicadores-container" class="indicadores-overlay">
-                    <div id="ind-rostro" class="badge badge-fail">❌ Rostro no detectado</div>
-                    <div id="ind-posicion" class="badge badge-fail">❌ Posición incorrecta</div>
-                    <div id="ind-distancia" class="badge badge-fail">❌ Distancia no válida</div>
-                    <div id="ind-fondo" class="badge badge-fail">❌ Fondo no blanco</div>
-                    <div id="ind-luz" class="badge badge-fail">❌ Iluminación incorrecta</div>
-                </div>
+            </div>
+
+            <!-- Panel de validaciones movido DEBAJO de la cámara -->
+            <div id="indicadores-container" class="indicadores-grid">
+                <div id="ind-rostro" class="badge badge-fail">❌ Rostro</div>
+                <div id="ind-posicion" class="badge badge-fail">❌ Posición</div>
+                <div id="ind-distancia" class="badge badge-fail">❌ Distancia</div>
+                <div id="ind-fondo" class="badge badge-fail">❌ Fondo</div>
+                <div id="ind-luz" class="badge badge-fail">❌ Luz</div>
             </div>
 
             <canvas id="canvas" width="240" height="288" style="display: none;"></canvas>
             
-            <div id="estado-camara" class="status-indicator">Iniciando análisis facial...</div>
+            <div id="estado-camara" class="status-indicator">Iniciando análisis...</div>
             
             <button type="button" id="btn-capturar" disabled>📸 Tomar Foto</button>
             <button type="button" id="btn-cambiar-camara" style="background-color: #6c757d; margin-top: 10px;">🔄 Cambiar Cámara</button>
