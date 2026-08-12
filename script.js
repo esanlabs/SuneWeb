@@ -140,15 +140,15 @@ function procesarResultadosFaciales(results) {
         return { x: canvasX, y: canvasY };
     }
 
-    // Obtenemos las coordenadas ya convertidas al tamaño SUNEDU
-    const ojoIzq = mapearCoordenada(landmarks[33]);
-    const ojoDer = mapearCoordenada(landmarks[263]);
-    const nariz = mapearCoordenada(landmarks[1]); // Usaremos la nariz para centrar
+    // Puntos clave: Nariz (centro) y las dos sienes (ancho del rostro)
+    const nariz = mapearCoordenada(landmarks[1]);
+    const sienIzq = mapearCoordenada(landmarks[234]);
+    const sienDer = mapearCoordenada(landmarks[454]);
 
     // 1. Verificar Posición (Usamos la nariz para saber si estás en el centro)
-    // El centro ideal del lienzo es X=120, Y=144. Te damos un margen cómodo.
-    const estaCentradoX = nariz.x >= 95 && nariz.x <= 145;
-    const estaCentradoY = nariz.y >= 110 && nariz.y <= 165;
+    // El centro del lienzo es X=120, Y=144. Ampliamos un poco el margen para que sea cómodo.
+    const estaCentradoX = nariz.x >= 90 && nariz.x <= 150;
+    const estaCentradoY = nariz.y >= 110 && nariz.y <= 170;
 
     if (estaCentradoX && estaCentradoY) {
         validaciones.posicion = true;
@@ -158,14 +158,16 @@ function procesarResultadosFaciales(results) {
         actualizarBadge(badgePos, false, "❌ Centra tu rostro");
     }
 
-    // 2. Verificar Distancia (Separación exacta en píxeles entre los ojos)
-    // Para encajar en las medidas SUNEDU, tus ojos deben tener esta separación.
-    const distanciaOjos = ojoDer.x - ojoIzq.x;
+    // 2. Verificar Distancia (Ancho total del rostro en el lienzo de 240px)
+    // Usamos Math.abs para evitar números negativos sin importar el efecto espejo.
+    const anchoRostro = Math.abs(sienDer.x - sienIzq.x);
     
-    if (distanciaOjos < 45) {
+    // Si la cara mide menos de 110px en el recorte, estás muy lejos.
+    // Si mide más de 190px, estás muy cerca (te saldrías del marco SUNEDU).
+    if (anchoRostro < 110) {
         validaciones.distancia = false;
         actualizarBadge(badgeDist, false, "❌ Acércate más");
-    } else if (distanciaOjos > 80) {
+    } else if (anchoRostro > 190) {
         validaciones.distancia = false;
         actualizarBadge(badgeDist, false, "❌ Aléjate un poco");
     } else {
