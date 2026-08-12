@@ -117,7 +117,7 @@ document.getElementById('btn-enviar').addEventListener('click', async () => {
       Reemplaza la URL_DE_TU_APPS_SCRIPT por la que Google te dé.
       ===============================================================
     */
-    const URL_APPS_SCRIPT = "URL_DE_TU_APPS_SCRIPT_AQUI";
+    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbzoChC6KMP-ayz1FZqtQ06EX13w4H4eA0zD7g1Fq5mBevjSN6922tpPwV4rYUIijP3s/exec";
 
     try {
         // MOCK DE ENVÍO (Simulación temporal para que veas cómo funciona)
