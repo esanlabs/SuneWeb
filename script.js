@@ -23,23 +23,32 @@ btnIngresar.addEventListener('click', () => {
 });
 
 // --- LÓGICA DEL PANEL 2: Cámara ---
+let modoCamara = "user"; // Empieza con la cámara frontal ('user' = frontal, 'environment' = trasera)
+
 async function iniciarCamara() {
     try {
-        // Pedimos la cámara con la máxima resolución posible idealmente
         const constraints = {
             video: {
                 width: { ideal: 1920 },
                 height: { ideal: 1080 },
-                facingMode: "user" // Cámara frontal
+                facingMode: modoCamara 
             }
         };
         
         streamActual = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = streamActual;
+        
+        // Aplicamos el efecto espejo VISUAL solo si es la cámara frontal
+        if (modoCamara === "user") {
+            video.classList.add('espejo');
+        } else {
+            video.classList.remove('espejo');
+        }
+
         document.getElementById('estado-camara').innerText = "Cámara lista. Ubique su rostro en las guías verdes.";
     } catch (err) {
         console.error("Error al acceder a la cámara: ", err);
-        document.getElementById('estado-camara').innerText = "Error: No se pudo acceder a la cámara. Revisa los permisos.";
+        document.getElementById('estado-camara').innerText = "Error: No se pudo acceder a la cámara o no hay otra disponible.";
     }
 }
 
@@ -49,6 +58,14 @@ function detenerCamara() {
     }
 }
 
+// Evento para cambiar entre cámara frontal y trasera
+document.getElementById('btn-cambiar-camara').addEventListener('click', () => {
+    // Alterna el modo
+    modoCamara = (modoCamara === "user") ? "environment" : "user";
+    detenerCamara(); // Apaga la actual
+    iniciarCamara(); // Enciende la nueva
+});
+
 document.getElementById('btn-volver-registro').addEventListener('click', () => {
     detenerCamara();
     cambiarPanel('panel-camara', 'panel-registro');
@@ -57,8 +74,6 @@ document.getElementById('btn-volver-registro').addEventListener('click', () => {
 document.getElementById('btn-capturar').addEventListener('click', () => {
     const context = canvas.getContext('2d');
     
-    // Dibujamos el cuadro actual del video en el canvas (dimensiones SUNEDU 240x288)
-    // Se recorta el centro de la cámara para que encaje
     const videoAspectRatio = video.videoWidth / video.videoHeight;
     const canvasAspectRatio = canvas.width / canvas.height;
     
@@ -76,11 +91,26 @@ document.getElementById('btn-capturar').addEventListener('click', () => {
         startY = (video.videoHeight - drawHeight) / 2;
     }
 
+    // Limpiamos el canvas por seguridad
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Guardamos el estado del context
+    context.save(); 
+
+    // Si estamos usando la cámara frontal, hacemos efecto espejo en el Canvas 
+    // para que la foto quede tal cual como el usuario se vio en pantalla
+    if (modoCamara === "user") {
+        context.translate(canvas.width, 0);
+        context.scale(-1, 1);
+    }
+
+    // Dibujamos la imagen
     context.drawImage(video, startX, startY, drawWidth, drawHeight, 0, 0, canvas.width, canvas.height);
     
-    // Obtenemos la imagen en formato base64 con calidad ajustada (para estar cerca a 50kb)
-    fotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
+    // Restauramos el context a su estado normal (para que no afecte siguientes fotos)
+    context.restore(); 
     
+    fotoBase64 = canvas.toDataURL('image/jpeg', 0.8);
     fotoPreview.src = fotoBase64;
     
     detenerCamara();
