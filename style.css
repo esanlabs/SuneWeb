@@ -1,0 +1,138 @@
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f4f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.app-container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.panel {
+    display: none; /* Oculta todos los paneles por defecto */
+}
+
+.panel.active {
+    display: block; /* Muestra solo el panel activo */
+}
+
+.input-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    width: 100%;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+button.btn-secundario {
+    background-color: #dc3545;
+}
+
+/* Estilos de la cámara y guías */
+.camera-wrapper {
+    position: relative;
+    width: 240px; /* Ancho SUNEDU */
+    height: 288px; /* Alto SUNEDU */
+    margin: 0 auto 15px auto;
+    background-color: #000;
+    overflow: hidden;
+    border: 2px solid #0056b3;
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Asegura que llene el recuadro sin deformarse */
+}
+
+.guide-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    border: 2px dashed rgba(255, 255, 255, 0.7);
+}
+
+/* Guías aproximadas basadas en tus coordenadas X/Y */
+.guide-eyes {
+    position: absolute;
+    top: 30%;
+    left: 10%;
+    right: 10%;
+    height: 20%;
+    border: 1px solid rgba(0, 255, 0, 0.5);
+    color: rgba(0, 255, 0, 0.8);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guide-mouth {
+    position: absolute;
+    top: 65%;
+    left: 20%;
+    right: 20%;
+    height: 15%;
+    border: 1px solid rgba(0, 255, 0, 0.5);
+    color: rgba(0, 255, 0, 0.8);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-indicator {
+    font-size: 12px;
+    color: #555;
+    margin-bottom: 15px;
+}
+
+.preview-container img {
+    border: 1px solid #ccc;
+    max-width: 240px;
+    margin-bottom: 15px;
+}
