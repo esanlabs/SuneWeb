@@ -107,42 +107,65 @@ function procesarResultadosFaciales(results) {
 
     const landmarks = results.multiFaceLandmarks[0];
 
-    // Coordenadas proporcionales transformadas al tamaño estándar SUNEDU (240x288)
-    let ojoIzqX = landmarks[33].x * 240;
-    let ojoIzqY = landmarks[33].y * 288;
-    let ojoDerX = landmarks[263].x * 240;
-    let ojoDerY = landmarks[263].y * 288;
-    let bocaX = landmarks[13].x * 240;
-    let bocaY = landmarks[13].y * 288;
-
-    // Efecto espejo matemático si se usa cámara frontal
-    if (modoCamara === "user") {
-        ojoIzqX = 240 - ojoIzqX;
-        ojoDerX = 240 - ojoDerX;
-        bocaX = 240 - bocaX;
+    // --- CÁLCULO MATEMÁTICO: Adaptar coordenadas al RECORTE (240x288) ---
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
+    const videoAspectRatio = videoWidth / videoHeight;
+    const canvasAspectRatio = 240 / 288;
+    
+    let drawWidth, drawHeight, startX, startY;
+    if (videoAspectRatio > canvasAspectRatio) {
+        drawHeight = videoHeight;
+        drawWidth = videoHeight * canvasAspectRatio;
+        startX = (videoWidth - drawWidth) / 2;
+        startY = 0;
+    } else {
+        drawWidth = videoWidth;
+        drawHeight = videoWidth / canvasAspectRatio;
+        startX = 0;
+        startY = (videoHeight - drawHeight) / 2;
     }
 
-    // 1. Verificar Posición (Límites SUNEDU puros)
-    const ojoIzqOk = (ojoIzqX >= 24 && ojoIzqX <= 120) && (ojoIzqY >= 55 && ojoIzqY <= 180);
-    const ojoDerOk = (ojoDerX >= 80 && ojoDerX <= 185) && (ojoDerY >= 50 && ojoDerY <= 180);
-    const bocaOk = (bocaX >= 50 && bocaX <= 161) && (bocaY >= 70 && bocaY <= 252);
+    // Función interna para mapear el punto de la IA al pixel exacto de la foto final
+    function mapearCoordenada(landmark) {
+        let vidX = landmark.x * videoWidth;
+        let vidY = landmark.y * videoHeight;
+        
+        let canvasX = (vidX - startX) * (240 / drawWidth);
+        let canvasY = (vidY - startY) * (288 / drawHeight);
+        
+        if (modoCamara === "user") {
+            canvasX = 240 - canvasX; // Aplicar espejo si es cámara frontal
+        }
+        return { x: canvasX, y: canvasY };
+    }
 
-    if (ojoIzqOk && ojoDerOk && bocaOk) {
+    // Obtenemos las coordenadas ya convertidas al tamaño SUNEDU
+    const ojoIzq = mapearCoordenada(landmarks[33]);
+    const ojoDer = mapearCoordenada(landmarks[263]);
+    const nariz = mapearCoordenada(landmarks[1]); // Usaremos la nariz para centrar
+
+    // 1. Verificar Posición (Usamos la nariz para saber si estás en el centro)
+    // El centro ideal del lienzo es X=120, Y=144. Te damos un margen cómodo.
+    const estaCentradoX = nariz.x >= 95 && nariz.x <= 145;
+    const estaCentradoY = nariz.y >= 110 && nariz.y <= 165;
+
+    if (estaCentradoX && estaCentradoY) {
         validaciones.posicion = true;
-        actualizarBadge(badgePos, true, "✅ Alineación correcta");
+        actualizarBadge(badgePos, true, "✅ Rostro centrado");
     } else {
         validaciones.posicion = false;
         actualizarBadge(badgePos, false, "❌ Centra tu rostro");
     }
 
-    // 2. Verificar Distancia (Separación entre los ojos)
-    // Esto evita la contradicción. Para un cuadro de 240px, una separación normal de ojos es ~55 a 90px.
-    const distanciaOjos = ojoDerX - ojoIzqX;
+    // 2. Verificar Distancia (Separación exacta en píxeles entre los ojos)
+    // Para encajar en las medidas SUNEDU, tus ojos deben tener esta separación.
+    const distanciaOjos = ojoDer.x - ojoIzq.x;
     
-    if (distanciaOjos < 55) {
+    if (distanciaOjos < 45) {
         validaciones.distancia = false;
         actualizarBadge(badgeDist, false, "❌ Acércate más");
-    } else if (distanciaOjos > 90) {
+    } else if (distanciaOjos > 80) {
         validaciones.distancia = false;
         actualizarBadge(badgeDist, false, "❌ Aléjate un poco");
     } else {
