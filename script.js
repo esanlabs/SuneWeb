@@ -51,7 +51,10 @@ async function iniciarCamara() {
             video.classList.remove('espejo');
         }
 
-        // Inicializar IA de Detección Facial de Google (MediaPipe)
+        // 1. FORZAR REPRODUCCIÓN (Soluciona el bloqueo en celulares)
+        await video.play();
+
+        // Inicializar IA de Detección Facial
         if (!faceMesh) {
             faceMesh = new FaceMesh({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
@@ -65,10 +68,8 @@ async function iniciarCamara() {
             faceMesh.onResults(procesarResultadosFaciales);
         }
 
-        // Iniciar bucle de análisis continuo
-        video.onloadedmetadata = () => {
-            analizarFotograma();
-        };
+        // 2. Iniciar bucle directamente después de que el video ya está corriendo
+        analizarFotograma();
 
     } catch (err) {
         console.error("Error cámara: ", err);
@@ -77,10 +78,19 @@ async function iniciarCamara() {
 }
 
 async function analizarFotograma() {
-    if (video.readyState >= 2) {
-        await faceMesh.send({ image: video });
-        analizarLuzYFondo(); // Análisis por píxeles
+    // Si cambiamos de panel o apagamos la cámara, detenemos el bucle
+    if (!streamActual) return; 
+    
+    try {
+        if (video.readyState >= 2) {
+            await faceMesh.send({ image: video });
+            analizarLuzYFondo(); 
+        }
+    } catch (error) {
+        // Ignoramos errores temporales mientras la IA descarga sus archivos internos
+        console.warn("Iniciando IA facial...");
     }
+    
     animFrameId = requestAnimationFrame(analizarFotograma);
 }
 
