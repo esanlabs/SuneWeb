@@ -147,32 +147,30 @@ function procesarResultadosFaciales(results) {
 
     // 1. Verificar Posición (Usamos la nariz para saber si estás en el centro)
     // El centro del lienzo es X=120, Y=144. Ampliamos un poco el margen para que sea cómodo.
-    const estaCentradoX = nariz.x >= 90 && nariz.x <= 150;
-    const estaCentradoY = nariz.y >= 110 && nariz.y <= 170;
+    const estaCentradoX = nariz.x >= 105 && nariz.x <= 135;
+    const estaCentradoY = nariz.y >= 125 && nariz.y <= 160;
 
     if (estaCentradoX && estaCentradoY) {
         validaciones.posicion = true;
-        actualizarBadge(badgePos, true, "✅ Rostro centrado");
+        actualizarBadge(badgePos, true, "✅ Centrado");
     } else {
         validaciones.posicion = false;
-        actualizarBadge(badgePos, false, "❌ Centra tu rostro");
+        actualizarBadge(badgePos, false, "❌ Descentrado");
     }
 
     // 2. Verificar Distancia (Ancho total del rostro en el lienzo de 240px)
     // Usamos Math.abs para evitar números negativos sin importar el efecto espejo.
     const anchoRostro = Math.abs(sienDer.x - sienIzq.x);
     
-    // Si la cara mide menos de 110px en el recorte, estás muy lejos.
-    // Si mide más de 190px, estás muy cerca (te saldrías del marco SUNEDU).
-    if (anchoRostro < 90) {
+    if (anchoRostro < 120) {
         validaciones.distancia = false;
-        actualizarBadge(badgeDist, false, "❌ Acércate más");
-    } else if (anchoRostro > 200) {
+        actualizarBadge(badgeDist, false, "❌ Acércate");
+    } else if (anchoRostro > 165) {
         validaciones.distancia = false;
-        actualizarBadge(badgeDist, false, "❌ Aléjate un poco");
+        actualizarBadge(badgeDist, false, "❌ Aléjate");
     } else {
         validaciones.distancia = true;
-        actualizarBadge(badgeDist, true, "✅ Distancia adecuada");
+        actualizarBadge(badgeDist, true, "✅ Distancia OK");
     }
 
     evaluarBotonCaptura();
