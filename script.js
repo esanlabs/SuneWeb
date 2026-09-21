@@ -34,7 +34,7 @@ btnIngresar.addEventListener('click', () => {
 // --- PANEL 2: Cámara e IA ---
 // --- PANEL 2: Cámara e IA ---
 async function iniciarCamara() {
-    // 1. Encender la cámara (Bloque aislado)
+    // 1. Encender la cámara
     try {
         const constraints = { video: { facingMode: modoCamara } };
         streamActual = await navigator.mediaDevices.getUserMedia(constraints);
@@ -52,25 +52,32 @@ async function iniciarCamara() {
         await video.play();
         
     } catch (err) {
-        console.error("Error real de cámara: ", err);
         document.getElementById('estado-camara').innerText = "Error: Cámara bloqueada o en uso por otra app.";
         document.getElementById('estado-camara').style.color = "red";
-        return; // Detenemos aquí si no hay cámara
+        return; 
     }
 
-    // 2. Inicializar la IA (Bloque aislado)
+    // 2. Inicializar la IA (con inyector de rescate)
     try {
-        // Verificamos si el modo incógnito o un bloqueador de anuncios mató el script
+        const estadoCamara = document.getElementById('estado-camara');
+        estadoCamara.innerText = "Descargando IA facial... (espera)";
+        estadoCamara.style.color = "#555";
+
+        // Si el navegador bloqueó el HTML, inyectamos la IA a la fuerza mediante JS
         if (typeof FaceMesh === 'undefined') {
-            throw new Error("El navegador bloqueó la IA (Prueba en modo normal).");
+            estadoCamara.innerText = "Forzando descarga de IA...";
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = "https://unpkg.com/@mediapipe/face_mesh/face_mesh.js";
+                script.crossOrigin = "anonymous";
+                script.onload = resolve;
+                script.onerror = () => reject(new Error("Tu red o navegador bloquea la descarga."));
+                document.head.appendChild(script);
+            });
         }
 
         if (!faceMesh) {
-            document.getElementById('estado-camara').innerText = "Descargando IA facial... (espera)";
-            document.getElementById('estado-camara').style.color = "#555";
-
             faceMesh = new FaceMesh({
-                // CAMBIADO A UNPKG AQUÍ TAMBIÉN
                 locateFile: (file) => `https://unpkg.com/@mediapipe/face_mesh/${file}`
             });
             faceMesh.setOptions({
@@ -84,12 +91,9 @@ async function iniciarCamara() {
             await faceMesh.initialize();
         }
 
-        // Arrancamos el bucle de la cámara solo cuando la IA ya respondió al 100%
         analizarFotograma();
 
     } catch (err) {
-        console.error("Error real de IA: ", err);
-        // Imprimimos el error exacto en la pantalla en vez de un texto genérico
         document.getElementById('estado-camara').innerText = "Error IA: " + err.message;
         document.getElementById('estado-camara').style.color = "red";
     }
