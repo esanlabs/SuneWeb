@@ -32,14 +32,12 @@ btnIngresar.addEventListener('click', () => {
 });
 
 // --- PANEL 2: Cámara e IA ---
+// --- PANEL 2: Cámara e IA ---
 async function iniciarCamara() {
     try {
+        // 1. Simplificamos las exigencias de la cámara para no asustar al celular
         const constraints = {
-            video: {
-                width: { ideal: 1280 },
-                height: { ideal: 720 },
-                facingMode: modoCamara 
-            }
+            video: { facingMode: modoCamara }
         };
         
         streamActual = await navigator.mediaDevices.getUserMedia(constraints);
@@ -51,11 +49,16 @@ async function iniciarCamara() {
             video.classList.remove('espejo');
         }
 
-        // 1. FORZAR REPRODUCCIÓN (Soluciona el bloqueo en celulares)
+        // 2. Esperamos a que el celular confirme que el video ya tiene información
+        await new Promise((resolve) => {
+            video.onloadedmetadata = () => resolve();
+        });
+
         await video.play();
 
-        // Inicializar IA de Detección Facial
+        // 3. Inicializar IA 
         if (!faceMesh) {
+            document.getElementById('estado-camara').innerText = "Descargando IA facial... (puede tardar unos segundos)";
             faceMesh = new FaceMesh({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
             });
@@ -66,29 +69,33 @@ async function iniciarCamara() {
                 minTrackingConfidence: 0.5
             });
             faceMesh.onResults(procesarResultadosFaciales);
+            
+            // Forzamos el encendido de la IA
+            await faceMesh.initialize();
         }
 
-        // 2. Iniciar bucle directamente después de que el video ya está corriendo
+        // Arrancamos el bucle
         analizarFotograma();
 
     } catch (err) {
         console.error("Error cámara: ", err);
-        document.getElementById('estado-camara').innerText = "Error: Sin acceso a la cámara.";
+        document.getElementById('estado-camara').innerText = "Error: Da permisos a la cámara y recarga la página.";
+        document.getElementById('estado-camara').style.color = "red";
     }
 }
 
 async function analizarFotograma() {
-    // Si cambiamos de panel o apagamos la cámara, detenemos el bucle
     if (!streamActual) return; 
     
     try {
-        if (video.readyState >= 2) {
+        // EL TRUCO ESTÁ AQUÍ: Solo enviamos el video si su ancho ya es mayor a 0.
+        // Esto evita que MediaPipe se rompa internamente.
+        if (video.readyState >= 2 && video.videoWidth > 0) {
             await faceMesh.send({ image: video });
             analizarLuzYFondo(); 
         }
     } catch (error) {
-        // Ignoramos errores temporales mientras la IA descarga sus archivos internos
-        console.warn("Iniciando IA facial...");
+        console.warn("Esperando a la IA...");
     }
     
     animFrameId = requestAnimationFrame(analizarFotograma);
