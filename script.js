@@ -70,7 +70,8 @@ async function iniciarCamara() {
             document.getElementById('estado-camara').style.color = "#555";
 
             faceMesh = new FaceMesh({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
+                // CAMBIADO A UNPKG AQUÍ TAMBIÉN
+                locateFile: (file) => `https://unpkg.com/@mediapipe/face_mesh/${file}`
             });
             faceMesh.setOptions({
                 maxNumFaces: 1,
@@ -80,7 +81,6 @@ async function iniciarCamara() {
             });
             faceMesh.onResults(procesarResultadosFaciales);
             
-            // Obligamos al celular a descargar todos los filtros ANTES de arrancar el video
             await faceMesh.initialize();
         }
 
