@@ -60,6 +60,11 @@ async function iniciarCamara() {
 
     // 2. Inicializar la IA (Bloque aislado)
     try {
+        // Verificamos si el modo incógnito o un bloqueador de anuncios mató el script
+        if (typeof FaceMesh === 'undefined') {
+            throw new Error("El navegador bloqueó la IA (Prueba en modo normal).");
+        }
+
         if (!faceMesh) {
             document.getElementById('estado-camara').innerText = "Descargando IA facial... (espera)";
             document.getElementById('estado-camara').style.color = "#555";
@@ -75,16 +80,17 @@ async function iniciarCamara() {
             });
             faceMesh.onResults(procesarResultadosFaciales);
             
-            // Hemos eliminado el await faceMesh.initialize() que causaba el quiebre.
-            // La IA se activará automáticamente al enviarle el video.
+            // Obligamos al celular a descargar todos los filtros ANTES de arrancar el video
+            await faceMesh.initialize();
         }
 
-        // Arrancamos el bucle
+        // Arrancamos el bucle de la cámara solo cuando la IA ya respondió al 100%
         analizarFotograma();
 
     } catch (err) {
         console.error("Error real de IA: ", err);
-        document.getElementById('estado-camara').innerText = "Error de conexión: No se pudo descargar la IA.";
+        // Imprimimos el error exacto en la pantalla en vez de un texto genérico
+        document.getElementById('estado-camara').innerText = "Error IA: " + err.message;
         document.getElementById('estado-camara').style.color = "red";
     }
 }
