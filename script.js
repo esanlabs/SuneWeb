@@ -34,12 +34,9 @@ btnIngresar.addEventListener('click', () => {
 // --- PANEL 2: Cámara e IA ---
 // --- PANEL 2: Cámara e IA ---
 async function iniciarCamara() {
+    // 1. Encender la cámara (Bloque aislado)
     try {
-        // 1. Simplificamos las exigencias de la cámara para no asustar al celular
-        const constraints = {
-            video: { facingMode: modoCamara }
-        };
-        
+        const constraints = { video: { facingMode: modoCamara } };
         streamActual = await navigator.mediaDevices.getUserMedia(constraints);
         video.srcObject = streamActual;
         
@@ -49,16 +46,24 @@ async function iniciarCamara() {
             video.classList.remove('espejo');
         }
 
-        // 2. Esperamos a que el celular confirme que el video ya tiene información
         await new Promise((resolve) => {
             video.onloadedmetadata = () => resolve();
         });
-
         await video.play();
+        
+    } catch (err) {
+        console.error("Error real de cámara: ", err);
+        document.getElementById('estado-camara').innerText = "Error: Cámara bloqueada o en uso por otra app.";
+        document.getElementById('estado-camara').style.color = "red";
+        return; // Detenemos aquí si no hay cámara
+    }
 
-        // 3. Inicializar IA 
+    // 2. Inicializar la IA (Bloque aislado)
+    try {
         if (!faceMesh) {
-            document.getElementById('estado-camara').innerText = "Descargando IA facial... (puede tardar unos segundos)";
+            document.getElementById('estado-camara').innerText = "Descargando IA facial... (espera)";
+            document.getElementById('estado-camara').style.color = "#555";
+
             faceMesh = new FaceMesh({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
             });
@@ -70,16 +75,16 @@ async function iniciarCamara() {
             });
             faceMesh.onResults(procesarResultadosFaciales);
             
-            // Forzamos el encendido de la IA
-            await faceMesh.initialize();
+            // Hemos eliminado el await faceMesh.initialize() que causaba el quiebre.
+            // La IA se activará automáticamente al enviarle el video.
         }
 
         // Arrancamos el bucle
         analizarFotograma();
 
     } catch (err) {
-        console.error("Error cámara: ", err);
-        document.getElementById('estado-camara').innerText = "Error: Da permisos a la cámara y recarga la página.";
+        console.error("Error real de IA: ", err);
+        document.getElementById('estado-camara').innerText = "Error de conexión: No se pudo descargar la IA.";
         document.getElementById('estado-camara').style.color = "red";
     }
 }
