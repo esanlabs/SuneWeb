@@ -89,27 +89,41 @@ async function iniciarCamara() {
     }
 }
 
-// Variable para evitar saturar el procesador del celular
+// Variable para no saturar el procesador
 let procesandoFrame = false; 
+// Truco para móviles: un lienzo invisible para procesar la imagen sin bloqueos
+let canvasOculto = document.createElement('canvas'); 
 
 async function analizarFotograma() {
     if (!streamActual) return; 
     
-    // Si el video está listo y la IA NO está ocupada, le enviamos el frame
     if (video.readyState >= 2 && video.videoWidth > 0 && !procesandoFrame) {
-        procesandoFrame = true; // Encendemos el semáforo rojo
+        procesandoFrame = true; // Semáforo en rojo
         
         try {
-            await faceMesh.send({ image: video });
+            // 1. Calcar el video en el lienzo invisible (soluciona el bug de celulares)
+            if (canvasOculto.width !== video.videoWidth) {
+                canvasOculto.width = video.videoWidth;
+                canvasOculto.height = video.videoHeight;
+            }
+            const ctx = canvasOculto.getContext('2d', { willReadFrequently: true });
+            ctx.drawImage(video, 0, 0, canvasOculto.width, canvasOculto.height);
+
+            // 2. Pasarle el lienzo limpio a la IA en lugar del video directo
+            await faceMesh.send({ image: canvasOculto });
+            
+            // 3. Evaluar luz y colores
             analizarLuzYFondo(); 
+            
         } catch (error) {
-            console.warn("Esperando a que la IA despierte...");
+            // Si el internet está lento y los archivos de Google siguen descargando, no pasa nada.
+            console.warn("Esperando a que la IA esté lista...", error);
+        } finally {
+            // 4. SALVAVIDAS: Sin importar qué pase, siempre liberamos el semáforo
+            procesandoFrame = false; 
         }
-        
-        procesandoFrame = false; // Ponemos el semáforo en verde para el siguiente frame
     }
     
-    // El bucle de video sigue girando sin bloquearse
     animFrameId = requestAnimationFrame(analizarFotograma);
 }
 
