@@ -89,20 +89,27 @@ async function iniciarCamara() {
     }
 }
 
+// Variable para evitar saturar el procesador del celular
+let procesandoFrame = false; 
+
 async function analizarFotograma() {
     if (!streamActual) return; 
     
-    try {
-        // EL TRUCO ESTÁ AQUÍ: Solo enviamos el video si su ancho ya es mayor a 0.
-        // Esto evita que MediaPipe se rompa internamente.
-        if (video.readyState >= 2 && video.videoWidth > 0) {
+    // Si el video está listo y la IA NO está ocupada, le enviamos el frame
+    if (video.readyState >= 2 && video.videoWidth > 0 && !procesandoFrame) {
+        procesandoFrame = true; // Encendemos el semáforo rojo
+        
+        try {
             await faceMesh.send({ image: video });
             analizarLuzYFondo(); 
+        } catch (error) {
+            console.warn("Esperando a que la IA despierte...");
         }
-    } catch (error) {
-        console.warn("Esperando a la IA...");
+        
+        procesandoFrame = false; // Ponemos el semáforo en verde para el siguiente frame
     }
     
+    // El bucle de video sigue girando sin bloquearse
     animFrameId = requestAnimationFrame(analizarFotograma);
 }
 
